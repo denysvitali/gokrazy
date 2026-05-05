@@ -50,6 +50,7 @@ var (
 	permTLSKeyPath                = "/perm/ssl/gokrazy-web.key.pem"
 	rootTLSCertPath               = "/etc/ssl/gokrazy-web.pem"
 	rootTLSKeyPath                = "/etc/ssl/gokrazy-web.key.pem"
+	rootTLSUsePermPath            = "/etc/ssl/gokrazy-web.use-perm"
 	rootTLSGenerateSelfSignedPath = "/etc/ssl/gokrazy-web.generate-self-signed"
 )
 
@@ -134,6 +135,14 @@ func tlsCertificatePaths() (certPath, keyPath string, err error) {
 		return "", "", err
 	}
 
+	usePerm, err := shouldUsePermTLSCertificate()
+	if err != nil {
+		return "", "", err
+	}
+	if !usePerm {
+		return rootTLSCertPath, rootTLSKeyPath, nil
+	}
+
 	if _, err := os.Stat(permTLSCertPath); err == nil {
 		return permTLSCertPath, permTLSKeyPath, nil
 	} else if !os.IsNotExist(err) {
@@ -157,6 +166,15 @@ func tlsCertificatePaths() (certPath, keyPath string, err error) {
 		return rootTLSCertPath, rootTLSKeyPath, nil
 	}
 	return permTLSCertPath, permTLSKeyPath, nil
+}
+
+func shouldUsePermTLSCertificate() (bool, error) {
+	if _, err := os.Stat(rootTLSUsePermPath); err == nil {
+		return true, nil
+	} else if !os.IsNotExist(err) {
+		return false, err
+	}
+	return false, nil
 }
 
 func shouldGenerateSelfSignedTLSCertificate() (bool, error) {

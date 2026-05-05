@@ -49,17 +49,18 @@ The gok CLI will:
 * include the certificate in the gokrazy installation
 * verify the certificate fingerprint in future updates
 
-When TLS is enabled by the root file system, gokrazy stores TLS certificates on
-the permanent data partition as `/perm/ssl/gokrazy-web.pem` and
-`/perm/ssl/gokrazy-web.key.pem`. On later boots, certificates in `/perm/ssl`
-take precedence over certificates included in the root file system. This keeps
-the active certificate stable across rootfs updates and reflashes.
+By default, gokrazy uses the certificate included in the root file system.
 
-Removing TLS from the root file system, for example by setting `UseTLS` to
-`"off"`, disables TLS even when certificates remain in `/perm/ssl`.
+To store TLS certificates on the permanent data partition, include the marker
+file `/etc/ssl/gokrazy-web.use-perm` in the image. With this marker present,
+gokrazy uses `/perm/ssl/gokrazy-web.pem` and
+`/perm/ssl/gokrazy-web.key.pem` when they exist. If they do not exist yet,
+gokrazy persists the image-provided certificate to `/perm/ssl` on first boot.
+On later boots, the certificate in `/perm/ssl` remains stable across rootfs
+updates and reflashes.
 
 If you distribute images and need each device to generate a unique certificate
-on first boot, include the marker file
+on first boot, include both `/etc/ssl/gokrazy-web.use-perm` and
 `/etc/ssl/gokrazy-web.generate-self-signed` in the image:
 
 {{< highlight json "hl_lines=9-13" >}}
@@ -72,6 +73,7 @@ on first boot, include the marker file
     "PackageConfig": {
         "github.com/gokrazy/breakglass": {
             "ExtraFileContents": {
+                "/etc/ssl/gokrazy-web.use-perm": "",
                 "/etc/ssl/gokrazy-web.generate-self-signed": ""
             }
         }
@@ -84,6 +86,9 @@ on first boot, include the marker file
     ]
 }
 {{< /highlight >}}
+
+Removing TLS from the root file system, for example by setting `UseTLS` to
+`"off"`, disables TLS even when certificates remain in `/perm/ssl`.
 
 The gokrazy installation will start listening on TCP port 443 for HTTPS
 connections and redirect any HTTP traffic to HTTPS. When opening the gokrazy web

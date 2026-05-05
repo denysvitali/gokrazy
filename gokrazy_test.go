@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestTLSCertificatePathsPrefersPerm(t *testing.T) {
+func TestTLSCertificatePathsUsesEmbeddedCertificateByDefault(t *testing.T) {
 	withTLSPaths(t)
 
 	if err := os.MkdirAll(filepath.Dir(permTLSCertPath), 0755); err != nil {
@@ -28,6 +28,40 @@ func TestTLSCertificatePathsPrefersPerm(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(rootTLSKeyPath, []byte("root key"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	certPath, keyPath, err := tlsCertificatePaths()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if certPath != rootTLSCertPath || keyPath != rootTLSKeyPath {
+		t.Fatalf("tlsCertificatePaths() = (%q, %q), want (%q, %q)", certPath, keyPath, rootTLSCertPath, rootTLSKeyPath)
+	}
+}
+
+func TestTLSCertificatePathsPrefersPermWhenRequested(t *testing.T) {
+	withTLSPaths(t)
+
+	if err := os.MkdirAll(filepath.Dir(permTLSCertPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(permTLSCertPath, []byte("perm cert"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(permTLSKeyPath, []byte("perm key"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(rootTLSCertPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(rootTLSCertPath, []byte("root cert"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(rootTLSKeyPath, []byte("root key"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(rootTLSUsePermPath, nil, 0644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -74,6 +108,9 @@ func TestTLSCertificatePathsPersistsRootCertificate(t *testing.T) {
 	if err := os.WriteFile(rootTLSKeyPath, []byte("root key"), 0600); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.WriteFile(rootTLSUsePermPath, nil, 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	certPath, keyPath, err := tlsCertificatePaths()
 	if err != nil {
@@ -96,6 +133,9 @@ func TestTLSCertificatePathsGeneratesPermCertificateWhenRequested(t *testing.T) 
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(rootTLSKeyPath, []byte("root key"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(rootTLSUsePermPath, nil, 0644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(rootTLSGenerateSelfSignedPath, nil, 0644); err != nil {
@@ -136,12 +176,14 @@ func withTLSPaths(t *testing.T) {
 	oldPermKeyPath := permTLSKeyPath
 	oldRootCertPath := rootTLSCertPath
 	oldRootKeyPath := rootTLSKeyPath
+	oldRootUsePermPath := rootTLSUsePermPath
 	oldRootGenerateSelfSignedPath := rootTLSGenerateSelfSignedPath
 	t.Cleanup(func() {
 		permTLSCertPath = oldPermCertPath
 		permTLSKeyPath = oldPermKeyPath
 		rootTLSCertPath = oldRootCertPath
 		rootTLSKeyPath = oldRootKeyPath
+		rootTLSUsePermPath = oldRootUsePermPath
 		rootTLSGenerateSelfSignedPath = oldRootGenerateSelfSignedPath
 	})
 
@@ -149,6 +191,7 @@ func withTLSPaths(t *testing.T) {
 	permTLSKeyPath = filepath.Join(permDir, "ssl", "gokrazy-web.key.pem")
 	rootTLSCertPath = filepath.Join(rootDir, "ssl", "gokrazy-web.pem")
 	rootTLSKeyPath = filepath.Join(rootDir, "ssl", "gokrazy-web.key.pem")
+	rootTLSUsePermPath = filepath.Join(rootDir, "ssl", "gokrazy-web.use-perm")
 	rootTLSGenerateSelfSignedPath = filepath.Join(rootDir, "ssl", "gokrazy-web.generate-self-signed")
 }
 
