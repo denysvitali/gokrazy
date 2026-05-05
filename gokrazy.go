@@ -45,13 +45,22 @@ var (
 	useTLS         bool
 )
 
+const (
+	defaultPermTLSCertPath               = "/perm/ssl/gokrazy-web.pem"
+	defaultPermTLSKeyPath                = "/perm/ssl/gokrazy-web.key.pem"
+	defaultRootTLSCertPath               = "/etc/ssl/gokrazy-web.pem"
+	defaultRootTLSKeyPath                = "/etc/ssl/gokrazy-web.key.pem"
+	defaultRootTLSUsePermPath            = "/etc/ssl/gokrazy-web.use-perm"
+	defaultRootTLSGenerateSelfSignedPath = "/etc/ssl/gokrazy-web.generate-self-signed"
+)
+
 var (
-	permTLSCertPath               = "/perm/ssl/gokrazy-web.pem"
-	permTLSKeyPath                = "/perm/ssl/gokrazy-web.key.pem"
-	rootTLSCertPath               = "/etc/ssl/gokrazy-web.pem"
-	rootTLSKeyPath                = "/etc/ssl/gokrazy-web.key.pem"
-	rootTLSUsePermPath            = "/etc/ssl/gokrazy-web.use-perm"
-	rootTLSGenerateSelfSignedPath = "/etc/ssl/gokrazy-web.generate-self-signed"
+	permTLSCertPath               = defaultPermTLSCertPath
+	permTLSKeyPath                = defaultPermTLSKeyPath
+	rootTLSCertPath               = defaultRootTLSCertPath
+	rootTLSKeyPath                = defaultRootTLSKeyPath
+	rootTLSUsePermPath            = defaultRootTLSUsePermPath
+	rootTLSGenerateSelfSignedPath = defaultRootTLSGenerateSelfSignedPath
 )
 
 func configureLoopback() error {
