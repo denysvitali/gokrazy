@@ -49,11 +49,14 @@ The gok CLI will:
 * include the certificate in the gokrazy installation
 * verify the certificate fingerprint in future updates
 
-On first boot, gokrazy stores TLS certificates on the permanent data partition
-as `/perm/ssl/gokrazy-web.pem` and `/perm/ssl/gokrazy-web.key.pem`. On later
-boots, certificates in `/perm/ssl` take precedence over certificates included
-in the root file system. This keeps the active certificate stable across rootfs
-updates and reflashes.
+When TLS is enabled by the root file system, gokrazy stores TLS certificates on
+the permanent data partition as `/perm/ssl/gokrazy-web.pem` and
+`/perm/ssl/gokrazy-web.key.pem`. On later boots, certificates in `/perm/ssl`
+take precedence over certificates included in the root file system. This keeps
+the active certificate stable across rootfs updates and reflashes.
+
+Removing TLS from the root file system, for example by setting `UseTLS` to
+`"off"`, disables TLS even when certificates remain in `/perm/ssl`.
 
 If you distribute images and need each device to generate a unique certificate
 on first boot, include the marker file
@@ -102,3 +105,7 @@ Change the `UseTLS` line to `"UseTLS": "off"` in your instance’s `config.json`
 
 Run `gok update --insecure`, and afterwards gokrazy will no longer contain the
 certificates and will serve unencrypted HTTP again.
+
+Certificates stored in `/perm/ssl` are left in place. If you enable TLS again
+later, gokrazy will reuse the persistent certificate unless you remove it from
+`/perm/ssl`.

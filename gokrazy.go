@@ -128,15 +128,15 @@ func setupTLS() error {
 }
 
 func tlsCertificatePaths() (certPath, keyPath string, err error) {
-	if _, err := os.Stat(permTLSCertPath); err == nil {
-		return permTLSCertPath, permTLSKeyPath, nil
-	} else if !os.IsNotExist(err) {
-		return "", "", err
-	}
-
 	if _, err := os.Stat(rootTLSCertPath); os.IsNotExist(err) {
 		return "", "", nil // Nothing to set up
 	} else if err != nil {
+		return "", "", err
+	}
+
+	if _, err := os.Stat(permTLSCertPath); err == nil {
+		return permTLSCertPath, permTLSKeyPath, nil
+	} else if !os.IsNotExist(err) {
 		return "", "", err
 	}
 

@@ -40,6 +40,28 @@ func TestTLSCertificatePathsPrefersPerm(t *testing.T) {
 	}
 }
 
+func TestTLSCertificatePathsRequiresRootCertificate(t *testing.T) {
+	withTLSPaths(t)
+
+	if err := os.MkdirAll(filepath.Dir(permTLSCertPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(permTLSCertPath, []byte("perm cert"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(permTLSKeyPath, []byte("perm key"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	certPath, keyPath, err := tlsCertificatePaths()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if certPath != "" || keyPath != "" {
+		t.Fatalf("tlsCertificatePaths() = (%q, %q), want empty paths", certPath, keyPath)
+	}
+}
+
 func TestTLSCertificatePathsPersistsRootCertificate(t *testing.T) {
 	withTLSPaths(t)
 
