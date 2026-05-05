@@ -51,32 +51,23 @@ The gok CLI will:
 
 By default, gokrazy uses the certificate included in the root file system.
 
-To store TLS certificates on the permanent data partition, include the marker
-file `/etc/ssl/gokrazy-web.use-perm` in the image. With this marker present,
-gokrazy uses `/perm/ssl/gokrazy-web.pem` and
-`/perm/ssl/gokrazy-web.key.pem` when they exist. If they do not exist yet,
-gokrazy persists the image-provided certificate to `/perm/ssl` on first boot.
-On later boots, the certificate in `/perm/ssl` remains stable across rootfs
-updates and reflashes.
+To store TLS certificates on the permanent data partition, set
+`Update.TLSCertificateStorage` to `perm`. With this setting, gokrazy uses
+`/perm/ssl/gokrazy-web.pem` and `/perm/ssl/gokrazy-web.key.pem` when they
+exist. If they do not exist yet, gokrazy persists the image-provided
+certificate to `/perm/ssl` on first boot. On later boots, the certificate in
+`/perm/ssl` remains stable across rootfs updates and reflashes.
 
 If you distribute images and need each device to generate a unique certificate
-on first boot, include both `/etc/ssl/gokrazy-web.use-perm` and
-`/etc/ssl/gokrazy-web.generate-self-signed` in the image:
+on first boot, set `Update.TLSCertificateStorage` to `perm-self-signed`:
 
-{{< highlight json "hl_lines=9-13" >}}
+{{< highlight json "hl_lines=6" >}}
 {
     "Hostname": "docs",
     "Update": {
         "HTTPPassword": "secret",
-        "UseTLS": "self-signed"
-    },
-    "PackageConfig": {
-        "github.com/gokrazy/breakglass": {
-            "ExtraFileContents": {
-                "/etc/ssl/gokrazy-web.use-perm": "",
-                "/etc/ssl/gokrazy-web.generate-self-signed": ""
-            }
-        }
+        "UseTLS": "self-signed",
+        "TLSCertificateStorage": "perm-self-signed"
     },
     "Packages": [
         "github.com/gokrazy/fbstatus",

@@ -975,18 +975,9 @@ The `UseTLS` field accepts the following values:
 - `off`: disable TLS even if certificates exist
 - `self-signed`: create (self-signed) TLS certificates if needed
 
-By default, gokrazy uses the certificate included in the root file system. To
-store TLS certificates on the permanent data partition, include
-`/etc/ssl/gokrazy-web.use-perm` in the image. With this marker present, gokrazy
-prefers `/perm/ssl/gokrazy-web.pem` and `/perm/ssl/gokrazy-web.key.pem`. If
-only image-provided certificates exist in `/etc/ssl`, gokrazy persists them to
-`/perm/ssl` on first boot and uses the persistent certificate from then on.
-
-For distributed images, include both `/etc/ssl/gokrazy-web.use-perm` and
-`/etc/ssl/gokrazy-web.generate-self-signed` to generate a unique self-signed
-certificate in `/perm/ssl` on first boot instead of persisting the
-image-provided certificate. When `UseTLS` is set to `off`, certificates left in
-`/perm/ssl` are ignored.
+By default, gokrazy uses the certificate included in the root file system. See
+[`TLSCertificateStorage`](#updatetlscertificatestorage) to opt into storing the
+certificate on the permanent data partition.
 
 See [Using TLS in untrusted networks](/userguide/tls-for-untrusted-networks/)
 for more details.
@@ -999,6 +990,36 @@ for more details.
     "Update": {
         "HTTPPassword": "secret",
         "UseTLS": "self-signed"
+    },
+    "Packages": [
+        "github.com/gokrazy/fbstatus",
+        "github.com/gokrazy/hello",
+        "github.com/gokrazy/serial-busybox",
+        "github.com/gokrazy/breakglass"
+    ]
+}
+{{< /highlight >}}
+
+### Update → TLSCertificateStorage {#updatetlscertificatestorage}
+
+The `TLSCertificateStorage` field accepts the following values:
+
+- empty (""): use the certificate embedded in the root file system
+- `root`: use the certificate embedded in the root file system
+- `perm`: use `/perm/ssl/gokrazy-web.pem` and `/perm/ssl/gokrazy-web.key.pem`, initializing them from the root file system on first boot if needed
+- `perm-self-signed`: generate a unique self-signed certificate in `/perm/ssl` on first boot if needed
+
+When `UseTLS` is set to `off`, certificates left in `/perm/ssl` are ignored.
+
+**Example:**
+
+{{< highlight json "hl_lines=6" >}}
+{
+    "Hostname": "webserver",
+    "Update": {
+        "HTTPPassword": "secret",
+        "UseTLS": "self-signed",
+        "TLSCertificateStorage": "perm-self-signed"
     },
     "Packages": [
         "github.com/gokrazy/fbstatus",
