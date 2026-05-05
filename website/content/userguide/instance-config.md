@@ -1004,7 +1004,7 @@ for more details.
 
 The `TLSCertificateStorage` field accepts the following values:
 
-- empty (""): use the certificate embedded in the root file system
+- empty (""): preserve the default behavior, currently equivalent to `root`
 - `root`: use the certificate embedded in the root file system
 - `perm`: use `/perm/ssl/gokrazy-web.pem` and `/perm/ssl/gokrazy-web.key.pem`, initializing them from the root file system on first boot if needed
 - `perm-self-signed`: generate a unique self-signed certificate in `/perm/ssl` on first boot if needed
