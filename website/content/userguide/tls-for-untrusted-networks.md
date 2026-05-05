@@ -95,6 +95,18 @@ gok update
 You can now safely update your gokrazy installation over untrusted networks,
 such as [unencrypted WiFi networks](/userguide/unencrypted-wifi/).
 
+## Regenerating a persistent certificate
+
+If `TLSCertificateStorage` is set to `perm` or `perm-self-signed`, remove
+`/perm/ssl/gokrazy-web.pem` and `/perm/ssl/gokrazy-web.key.pem`, then reboot.
+
+With `perm`, gokrazy initializes `/perm/ssl` from the certificate included in
+the root file system. With `perm-self-signed`, gokrazy generates a new
+self-signed certificate on the device.
+
+After regenerating the certificate, clients that pin the certificate fingerprint
+will need to trust the new fingerprint.
+
 ## Disabling TLS
 
 Change the `UseTLS` line to `"UseTLS": "off"` in your instance’s `config.json`.
