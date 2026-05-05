@@ -975,6 +975,15 @@ The `UseTLS` field accepts the following values:
 - `off`: disable TLS even if certificates exist
 - `self-signed`: create (self-signed) TLS certificates if needed
 
+At boot, gokrazy prefers certificates from `/perm/ssl/gokrazy-web.pem` and
+`/perm/ssl/gokrazy-web.key.pem`. If only image-provided certificates exist in
+`/etc/ssl`, gokrazy persists them to `/perm/ssl` on first boot and uses the
+persistent certificate from then on.
+
+For distributed images, include `/etc/ssl/gokrazy-web.generate-self-signed` to
+generate a unique self-signed certificate in `/perm/ssl` on first boot instead
+of persisting the image-provided certificate.
+
 See [Using TLS in untrusted networks](/userguide/tls-for-untrusted-networks/)
 for more details.
 
