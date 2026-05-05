@@ -82,31 +82,6 @@ func runWatchdog() {
 	}
 }
 
-func setupTLS() error {
-	if _, err := os.Stat("/etc/ssl/gokrazy-web.pem"); os.IsNotExist(err) {
-		return nil // Nothing to set up
-	}
-	cert, err := tls.LoadX509KeyPair("/etc/ssl/gokrazy-web.pem", "/etc/ssl/gokrazy-web.key.pem")
-	if err != nil {
-		return fmt.Errorf("failed loading certificate: %v", err)
-	}
-	useTLS = true
-	tlsConfig = &tls.Config{
-		Certificates:             []tls.Certificate{cert},
-		MinVersion:               tls.VersionTLS12,
-		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
-		PreferServerCipherSuites: true,
-		CipherSuites: []uint16{
-			// required for http/2
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			// See https://cipherlist.eu/
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
-		},
-	}
-	return nil
-}
-
 // readConfigFile reads configuration files from /perm /etc or / and returns trimmed content as string
 func readConfigFile(fileName string) (string, error) {
 	str, err := ioutil.ReadFile("/perm/" + fileName)

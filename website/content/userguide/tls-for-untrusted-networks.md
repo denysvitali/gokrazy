@@ -49,6 +49,38 @@ The gok CLI will:
 * include the certificate in the gokrazy installation
 * verify the certificate fingerprint in future updates
 
+By default, gokrazy uses the certificate included in the root file system.
+
+To store TLS certificates on the permanent data partition, set
+`Update.TLSCertificateStorage` to `perm`. With this setting, gokrazy uses
+`/perm/ssl/gokrazy-web.pem` and `/perm/ssl/gokrazy-web.key.pem` when they
+exist. If they do not exist yet, gokrazy persists the image-provided
+certificate to `/perm/ssl` on first boot. On later boots, the certificate in
+`/perm/ssl` remains stable across rootfs updates and reflashes.
+
+If you distribute images and need each device to generate a unique certificate
+on first boot, set `Update.TLSCertificateStorage` to `perm-self-signed`:
+
+{{< highlight json "hl_lines=6" >}}
+{
+    "Hostname": "docs",
+    "Update": {
+        "HTTPPassword": "secret",
+        "UseTLS": "self-signed",
+        "TLSCertificateStorage": "perm-self-signed"
+    },
+    "Packages": [
+        "github.com/gokrazy/fbstatus",
+        "github.com/gokrazy/hello",
+        "github.com/gokrazy/serial-busybox",
+        "github.com/gokrazy/breakglass"
+    ]
+}
+{{< /highlight >}}
+
+Removing TLS from the root file system, for example by setting `UseTLS` to
+`"off"`, disables TLS even when certificates remain in `/perm/ssl`.
+
 The gokrazy installation will start listening on TCP port 443 for HTTPS
 connections and redirect any HTTP traffic to HTTPS. When opening the gokrazy web
 interface in your browser, you will need to explicitly permit communication due
@@ -63,9 +95,25 @@ gok update
 You can now safely update your gokrazy installation over untrusted networks,
 such as [unencrypted WiFi networks](/userguide/unencrypted-wifi/).
 
+## Regenerating a persistent certificate
+
+If `TLSCertificateStorage` is set to `perm` or `perm-self-signed`, remove
+`/perm/ssl/gokrazy-web.pem` and `/perm/ssl/gokrazy-web.key.pem`, then reboot.
+
+With `perm`, gokrazy initializes `/perm/ssl` from the certificate included in
+the root file system. With `perm-self-signed`, gokrazy generates a new
+self-signed certificate on the device.
+
+After regenerating the certificate, clients that pin the certificate fingerprint
+will need to trust the new fingerprint.
+
 ## Disabling TLS
 
 Change the `UseTLS` line to `"UseTLS": "off"` in your instance’s `config.json`.
 
 Run `gok update --insecure`, and afterwards gokrazy will no longer contain the
 certificates and will serve unencrypted HTTP again.
+
+Certificates stored in `/perm/ssl` are left in place. If you enable TLS again
+later, gokrazy will reuse the persistent certificate unless you remove it from
+`/perm/ssl`.
